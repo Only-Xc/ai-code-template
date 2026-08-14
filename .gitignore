@@ -1,0 +1,22 @@
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# macOS Finder metadata
+.DS_Store
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.coverage
+htmlcov/
+
+# Local environment overrides
+.env.local

@@ -1,0 +1,13 @@
+{
+    "recommendations": [
+        "FastAPILabs.fastapi-vscode",
+        "charliermarsh.ruff",
+        "docker.docker",
+        "mjmlio.vscode-mjml",
+        "ms-python.python",
+        "tombi-toml.tombi",
+        "mikestead.dotenv",
+        "editorconfig.editorconfig",
+        "ms-python.vscode-pylance"
+    ]
+}

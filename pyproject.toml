@@ -1,0 +1,114 @@
+[dependency-groups]
+dev = [
+    "import-linter>=2.13",
+    "prek>=0.2.24,<1.0.0",
+    "pyright>=1.1.407",
+    "ruff<1.0.0,>=0.2.2",
+]
+
+[tool.uv.workspace]
+members = [
+    "apps/api",
+    "modules/auth",
+    "modules/items",
+    "packages/core",
+]
+
+[tool.ruff]
+target-version = "py311"
+exclude = [
+    "apps/api/app/alembic",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "W",
+    "F",
+    "I",
+    "B",
+    "C4",
+    "UP",
+    "ARG001",
+    "T201",
+]
+ignore = [
+    "E501",
+    "B008",
+    "W191",
+    "B904",
+]
+
+[tool.ruff.lint.pyupgrade]
+keep-runtime-typing = true
+
+[tool.pyright]
+pythonVersion = "3.11"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"
+extraPaths = [
+    "apps/api",
+    "modules/auth/src",
+    "modules/items/src",
+    "packages/core/src",
+]
+include = [
+    "apps/api/app",
+    "apps/api/tests",
+    "modules",
+    "packages",
+]
+exclude = [
+    "apps/api/app/alembic",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "unit: pure unit tests without database, network, or TestClient",
+    "integration: tests that use database, filesystem, Docker, or process boundaries",
+    "api: FastAPI/TestClient API tests",
+    "slow: slow tests excluded from fast local verification",
+]
+
+[tool.importlinter]
+root_packages = [
+    "app",
+    "fast_auth",
+    "fast_core",
+    "fast_items",
+]
+
+[[tool.importlinter.contracts]]
+name = "packages do not depend on apps or modules"
+type = "forbidden"
+source_modules = ["fast_core"]
+forbidden_modules = ["app", "fast_auth", "fast_items"]
+
+[[tool.importlinter.contracts]]
+name = "modules do not depend on app"
+type = "forbidden"
+source_modules = ["fast_auth", "fast_items"]
+forbidden_modules = ["app"]
+
+[[tool.importlinter.contracts]]
+name = "modules do not import other modules internals"
+type = "forbidden"
+source_modules = ["fast_auth", "fast_items"]
+allow_indirect_imports = true
+forbidden_modules = [
+    "fast_auth.service",
+    "fast_auth.services",
+    "fast_auth.repository",
+    "fast_auth.repositories",
+    "fast_auth.router",
+    "fast_auth.routers",
+    "fast_auth.models",
+    "fast_items.service",
+    "fast_items.services",
+    "fast_items.repository",
+    "fast_items.repositories",
+    "fast_items.router",
+    "fast_items.routers",
+    "fast_items.models",
+]

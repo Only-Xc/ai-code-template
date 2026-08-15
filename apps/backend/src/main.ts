@@ -37,4 +37,4 @@ async function bootstrap() {
   // 打印启动日志
   console.log(`Application is running on: ${await app.getUrl()}`)
 }
-bootstrap()
+void bootstrap()

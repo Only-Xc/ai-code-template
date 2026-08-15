@@ -7,21 +7,14 @@ import oxlint from 'eslint-plugin-oxlint'
 import { defineConfig } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
+import { templateIgnorePatterns } from '../ignores.js'
 
 const tsconfigRootDir = new URL('../../..', import.meta.url).pathname
 
 export const eslintConfig = defineConfig([
   {
     name: '@template/ignores',
-    ignores: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/coverage/**',
-      '**/.turbo/**',
-      '**/.vite/**',
-      'eslint.config.mjs',
-    ],
+    ignores: templateIgnorePatterns,
   },
   {
     name: '@template/javascript',
@@ -41,6 +34,7 @@ export const eslintConfig = defineConfig([
         projectService: {
           allowDefaultProject: [
             'packages/tooling/eslint/*.js',
+            'packages/tooling/ignores.js',
           ],
         },
         tsconfigRootDir,
@@ -96,6 +90,21 @@ export const eslintConfig = defineConfig([
     },
     rules: {
       'n/prefer-node-protocol': 'error',
+      // 代码库使用无扩展名 TS 相对导入（NestJS 工具链可解析），缺失模块由 tsc/oxlint 兜底检查
+      'n/no-missing-import': 'off',
+    },
+  },
+  {
+    name: '@template/backend-unsafe',
+    files: ['apps/backend/**/*.{ts,tsx}'],
+    rules: {
+      // NestJS/Express/Prisma/Supertest 广泛使用 any（DI、请求响应、测试断言），
+      // no-unsafe-* 类规则在此误报过多，对 backend 关闭；utils 仍保留完整类型检查
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
     },
   },
   // oxlint 在最后：关闭已被 oxlint CLI (先于 eslint 执行) 覆盖的 ~220 条 correctness 规则

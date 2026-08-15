@@ -18,7 +18,7 @@ function run(command: string[]): number {
 
 // fast 层：lint -> format -> typecheck -> 单测 -> e2e
 const checks: Array<[string, string[]]> = [
-  ['lint', ['pnpm', '--filter', '@template/backend', 'lint:check']],
+  ['lint', ['pnpm', '--filter', '@template/backend', 'lint']],
   ['format:check', ['pnpm', 'format:check']],
   ['typecheck', ['pnpm', 'typecheck']],
   ['test', ['pnpm', '--filter', '@template/backend', 'test']],

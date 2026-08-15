@@ -6,6 +6,8 @@
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
     "eslint.config.mjs",
+    "oxlint.config.ts",
+    "oxfmt.config.ts",
     "packages/tooling/**",
     "tsconfig.json"
   ],
@@ -19,9 +21,12 @@
       "outputs": []
     },
     "format": {
+      "dependsOn": ["^format"],
+      "cache": false,
       "outputs": []
     },
     "format:check": {
+      "dependsOn": ["^format:check"],
       "outputs": []
     },
     "typecheck": {

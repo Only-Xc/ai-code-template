@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./eslint": "./eslint/index.js",
+    "./ignores": "./ignores.js",
     "./tsconfig/browser-lib.json": "./tsconfig/browser-lib.json",
     "./tsconfig/nest.json": "./tsconfig/nest.json",
     "./tsconfig/node.json": "./tsconfig/node.json"

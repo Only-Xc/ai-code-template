@@ -134,7 +134,7 @@ export class TokenResponse {
   refresh_token!: string
 
   @ApiProperty({ description: '令牌类型', default: 'bearer' })
-  token_type: string = 'bearer'
+  token_type = 'bearer'
 }
 
 export class UserPublic {

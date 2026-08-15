@@ -16,7 +16,7 @@ const ENV_OVERRIDES: Array<[string, string]> = [
 ]
 
 export function getEnv() {
-  return process.env.RUNNING_ENV || 'dev'
+  return process.env.RUNNING_ENV ?? 'dev'
 }
 
 export function getEnvFilePath(name) {
@@ -61,13 +61,16 @@ function applyEnvOverrides(config) {
 let baseYamlConfig
 let envYamlConfig
 
+// 配置值来自动态 YAML，类型无法静态确定
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function configuration(): Record<string, any>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function configuration(path: string): any
 export function configuration(path?: string) {
   const environment = getEnv()
 
-  baseYamlConfig = baseYamlConfig || parseYaml(getEnvFilePath('base'))
-  envYamlConfig = envYamlConfig || parseYaml(getEnvFilePath(environment))
+  baseYamlConfig = baseYamlConfig ?? parseYaml(getEnvFilePath('base'))
+  envYamlConfig = envYamlConfig ?? parseYaml(getEnvFilePath(environment))
 
   const mergeConfig = merge({}, baseYamlConfig, envYamlConfig)
 

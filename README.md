@@ -73,7 +73,7 @@ pnpm --filter @template/backend start:dev
 # 后端
 pnpm --filter @template/backend build
 pnpm --filter @template/backend typecheck
-pnpm --filter @template/backend lint:check
+pnpm --filter @template/backend lint
 pnpm --filter @template/backend format:check
 pnpm --filter @template/backend test
 pnpm --filter @template/backend test:e2e

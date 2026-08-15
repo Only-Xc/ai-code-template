@@ -67,7 +67,7 @@
 
 - 先跑最窄、最相关的命令，再逐步扩大到工作区级验证
 - 常用命令：
-  - `pnpm --filter @template/backend build` / `typecheck` / `lint:check` / `format:check` / `test` / `test:e2e`
+  - `pnpm --filter @template/backend build` / `typecheck` / `lint` / `format:check` / `test` / `test:e2e`
   - `pnpm --filter @template/backend prisma:migrate` / `prisma:migrate:deploy` / `db:seed`
   - 根级质量门禁：`pnpm verify`（fast）或 `pnpm verify:full`
   - 本地依赖服务：`pnpm dev:compose-up` / `dev:compose-down`

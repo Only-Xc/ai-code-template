@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus } from '@nestjs/common'
 import { RESPONSE_ERROR_CODE } from './constants'
 
-type ResponseError = {
+interface ResponseError {
   code: number
   message: string
 }

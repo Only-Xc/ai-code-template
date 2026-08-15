@@ -1,0 +1,41 @@
+{
+  "name": "@template/nestjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "format": "turbo run format",
+    "format:check": "turbo run format:check",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "typecheck:root": "tsc -b --noEmit",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "tsx scripts/deploy.ts deploy",
+    "deploy:build": "tsx scripts/deploy.ts build",
+    "deploy:up": "tsx scripts/deploy.ts up",
+    "deploy:down": "tsx scripts/deploy.ts down",
+    "deploy:restart": "tsx scripts/deploy.ts restart",
+    "deploy:logs": "tsx scripts/deploy.ts logs",
+    "deploy:status": "tsx scripts/deploy.ts status",
+    "deploy:migrate": "tsx scripts/deploy.ts migrate",
+    "deploy:pull": "tsx scripts/deploy.ts pull",
+    "dev:compose-up": "tsx scripts/dev.ts compose-up",
+    "dev:compose-down": "tsx scripts/dev.ts compose-down",
+    "dev:compose-logs": "tsx scripts/dev.ts compose-logs",
+    "dev:api": "tsx scripts/dev.ts api",
+    "dev:migrate": "tsx scripts/dev.ts migrate",
+    "verify": "tsx scripts/verify.ts --fast",
+    "verify:full": "tsx scripts/verify.ts --full"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@11.11.0",
+  "devDependencies": {
+    "@template/tooling": "workspace:*",
+    "@types/node": "catalog:",
+    "oxfmt": "catalog:",
+    "tsx": "^4.19.0",
+    "typescript": "catalog:",
+    "turbo": "catalog:"
+  }
+}

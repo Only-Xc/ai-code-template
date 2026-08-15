@@ -1,0 +1,8 @@
+app:
+  env: production
+
+logger:
+  level: info
+
+# 生产连接密钥由环境变量注入：DATABASE_URL / REDIS_URL / OBJECT_STORAGE_*，
+# configuration() 的 env 覆盖层会用 process.env 替换 YAML 中的 database/redis/storage 默认值。

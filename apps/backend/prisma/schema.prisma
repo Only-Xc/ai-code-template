@@ -1,0 +1,20 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+  moduleFormat    = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==================== 命名规范说明 ====================
+// 1. 项目前缀：所有表统一加 `fp_` 前缀（fp=项目名称缩写）
+// 2. 字段映射：Prisma代码用驼峰，数据库字段用下划线（通过 @map 映射）
+// 3. 索引命名：索引名统一加 `fp_` 前缀，避免多系统冲突
+// =======================================================

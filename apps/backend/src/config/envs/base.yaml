@@ -1,0 +1,36 @@
+app:
+  name: forest-panel-backend
+  env: development
+
+server:
+  host: 0.0.0.0
+  port: 3000
+
+database:
+  url: postgresql://postgres:postgres@localhost:5432/nestjs
+
+redis:
+  host: localhost
+  port: 6379
+  auth: ""
+  db: 0
+
+storage:
+  endpoint: http://localhost:9000
+  accessKey: minioadmin
+  secretKey: minioadmin123
+  bucket: app-assets
+  region: us-east-1
+  autoCreateBucket: true
+
+auth:
+  jwtSecret: dev-secret-change-me
+  accessTokenTtl: 3600
+  refreshTokenTtl: 2592000
+  rateLimitRequests: 5
+  rateLimitWindowSeconds: 60
+  initialAdminEmail: admin@example.com
+  initialAdminPassword: admin123
+
+logger:
+  level: info

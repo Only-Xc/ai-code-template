@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+dist
+**/dist
+.turbo
+**/.turbo
+.git
+.gitignore
+coverage
+*.log
+.DS_Store
+apps/backend/generated
+apps/backend/data

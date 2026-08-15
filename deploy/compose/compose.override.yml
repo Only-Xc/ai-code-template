@@ -1,0 +1,20 @@
+services:
+  db:
+    restart: "no"
+    ports:
+      - "5432:5432"
+
+  redis:
+    restart: "no"
+    ports:
+      - "6379:6379"
+
+  minio:
+    restart: "no"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+networks:
+  traefik-public:
+    external: false

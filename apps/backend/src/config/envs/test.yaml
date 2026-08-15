@@ -1,0 +1,14 @@
+app:
+  env: test
+
+server:
+  port: 3001
+
+database:
+  url: postgresql://postgres:postgres@localhost:5432/nestjs_test
+
+redis:
+  db: 1
+
+logger:
+  level: warn

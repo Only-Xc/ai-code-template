@@ -1,0 +1,20 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": "tsconfig.jest.json"
+      }
+    ]
+  },
+  "transformIgnorePatterns": ["/node_modules/(?!.*lodash-es)"],
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^generated/prisma/(.*)$": "<rootDir>/../generated/prisma/$1",
+    "^src/(.*)$": "<rootDir>/../src/$1"
+  }
+}

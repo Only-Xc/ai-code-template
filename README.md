@@ -59,6 +59,24 @@ pnpm dev
 3. admin-web 在 `src/api/<domain>.ts` 用 `request()`（见 `_request.ts` 的 `createApiCaller`）包装为 Promise 调用。
 4. 请求客户端在 `apps/admin-web/src/utils/request.ts` 组装插件（auth / i18n / dedupe / restful / error-handler），401 自动清理凭证并跳转 `/login`。
 
+## 通用 hooks 与工具
+
+admin-web 内置与业务无关的通用件，新页面优先复用：
+
+| 路径 | 说明 |
+| ---- | ---- |
+| `src/hooks/useForm.ts` / `useFormData.ts` | antd Form 同步控制 / 独立表单式数据控制（搜索、筛选、工具栏状态） |
+| `src/hooks/useModal.tsx` | 带 Promise 接口的命令式 modal（submitting 感知、离场动画后卸载、错误保留可重试） |
+| `src/hooks/useSearchParamAction.ts` | 一次性 URL 查询参数指令（触发后 replace 抹掉参数） |
+| `src/utils/download.ts` | `downloadBlob` 浏览器下载（用后释放 object URL） |
+| `src/utils/tree.ts` | `flattenTree` 深度优先展平（防环） |
+| `src/utils/url.ts` | `resolveHttpUrl` 安全解析 http(s) 地址 |
+| `src/utils/date.ts` | dayjs 显示格式化/时间戳/比较 |
+| `src/utils/error.ts` | `errorMessage` / `showUnexpectedError`（请求层已上报的错误不重复弹窗） |
+| `src/utils/validation.ts` | `isValidEmail` 等输入校验 |
+
+共享组件除根入口外提供子路径导入（如 `@ai-app/components/StatusTag` 形态）：`@ai-app/components/{PageContainer,EmptyState,LoadingState,ErrorState}`。
+
 ## 认证
 
 当前为 demo mock 登录：预填账号 `admin@example.com` / `123456`，点击登录即写入 mock token 并跳转 `/dashboard`，无需后端。相关代码集中在 `apps/admin-web/src/mock/auth.ts`（mock 账号、token、用户信息），登录页与路由守卫共用，均注释「接入真实接口后请删除」。

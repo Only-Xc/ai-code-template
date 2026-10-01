@@ -4,9 +4,10 @@ import { setDictLocale } from '@ai-app/dictionaries'
 import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useIsomorphicLayoutEffect } from 'usehooks-ts'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
+import { queryClient } from '@/api/queryClient'
 import { defaultSettings } from '@/config/defaultSettings'
 import { syncDayjsLocale } from '@/i18n/dayjs'
 import { useLocale } from '@/i18n/useLocale'
@@ -16,16 +17,6 @@ import { GlobalMessageRegister } from '@/utils/message'
 interface Props {
   children: ReactNode
 }
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30 * 1000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
 
 export function AppProvider({ children }: Props) {
   const colorPrimary = defaultSettings.colorPrimary

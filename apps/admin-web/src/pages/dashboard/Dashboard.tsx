@@ -8,6 +8,14 @@ import { Card, Col, Row, Statistic, Table, Tag, Typography } from 'antd'
 import type { TableColumnsType } from 'antd'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+
+import { LoadingState } from '@ai-app/components'
+
+import { dashboardKeys } from '@/api/keys'
+import { invalidateDashboardData } from '@/api/invalidation'
+import { queryClient } from '@/api/queryClient'
+import { useSearchParamAction } from '@/hooks/useSearchParamAction'
 
 // 以下为 demo 数据：接入真实接口后请删除
 interface DemoStat {
@@ -42,6 +50,13 @@ const demoStats: DemoStat[] = [
     icon: <FireOutlined className="text-(--blue)" />,
   },
 ]
+
+// demo 数据：模拟一次接口往返，接入真实接口后替换为 request 调用
+function fetchDemoStats(): Promise<DemoStat[]> {
+  const { promise, resolve } = Promise.withResolvers<DemoStat[]>()
+  setTimeout(() => resolve(demoStats), 300)
+  return promise
+}
 
 interface DemoRecord {
   id: string
@@ -92,6 +107,17 @@ const demoRecords: DemoRecord[] = [
 export function DashboardPage() {
   const { t } = useTranslation()
 
+  // 统计卡片走 TanStack Query：key 由工厂统一管理，初次加载呈现占位态
+  const { data: stats, isPending } = useQuery({
+    queryKey: dashboardKeys.stats('today'),
+    queryFn: fetchDemoStats,
+  })
+
+  // 一次性 URL 指令示例：/dashboard?refresh=1 触发一次数据失效，随后参数被抹掉
+  useSearchParamAction('refresh', '1', () => {
+    void invalidateDashboardData(queryClient)
+  })
+
   const columns: TableColumnsType<DemoRecord> = [
     {
       title: t('pages.dashboard.recent.columns.id'),
@@ -133,21 +159,25 @@ export function DashboardPage() {
         </Typography.Paragraph>
       </div>
 
-      <Row gutter={[16, 16]}>
-        {demoStats.map((stat) => (
-          <Col key={stat.key} xs={24} sm={12} xl={6}>
-            <Card className="h-full!" variant="borderless">
-              <Statistic
-                prefix={stat.icon}
-                precision={stat.precision}
-                suffix={stat.suffix}
-                title={t(`pages.dashboard.stats.${stat.key}`)}
-                value={stat.value}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
+      {isPending ? (
+        <LoadingState />
+      ) : (
+        <Row gutter={[16, 16]}>
+          {(stats ?? []).map((stat) => (
+            <Col key={stat.key} xs={24} sm={12} xl={6}>
+              <Card className="h-full!" variant="borderless">
+                <Statistic
+                  prefix={stat.icon}
+                  precision={stat.precision}
+                  suffix={stat.suffix}
+                  title={t(`pages.dashboard.stats.${stat.key}`)}
+                  value={stat.value}
+                />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )}
 
       <Card title={t('pages.dashboard.recent.title')} variant="borderless">
         <Table<DemoRecord>

@@ -1,10 +1,17 @@
-import { Module } from '@nestjs/common'
+import {
+  Module,
+  RequestMethod,
+  type MiddlewareConsumer,
+  type NestModule,
+} from '@nestjs/common'
 import { PrismaModule } from './prisma/prisma.module'
 import { HealthController, ReadinessController } from './health.controller'
 import { ConfigModule } from '@nestjs/config'
 import { configuration } from './config'
 import { APP_INTERCEPTOR } from '@nestjs/core'
 import { ResponseInterceptor } from './common/interceptors/response.interceptor'
+import { RequestContext } from './common/observability/request-context'
+import { RequestContextMiddleware } from './common/observability/request-context.middleware'
 import { CacheModule } from '@nestjs/cache-manager'
 import KeyvRedis, { Keyv } from '@keyv/redis'
 import { StorageModule } from './storage/storage.module'
@@ -34,7 +41,7 @@ import { AuthModule } from './auth/auth.module'
       },
     }),
     PrismaModule,
-    StorageModule,
+    StorageModule.register(),
     AuthModule,
   ],
   controllers: [HealthController, ReadinessController],
@@ -44,6 +51,15 @@ import { AuthModule } from './auth/auth.module'
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
     },
+    RequestContext,
+    RequestContextMiddleware,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestContextMiddleware).forRoutes({
+      path: '{*path}',
+      method: RequestMethod.ALL,
+    })
+  }
+}

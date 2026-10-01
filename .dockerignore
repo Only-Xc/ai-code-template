@@ -11,3 +11,4 @@ coverage
 .DS_Store
 services/backend/generated
 services/backend/data
+services/backend/.data

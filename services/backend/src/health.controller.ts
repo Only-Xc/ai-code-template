@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto'
 import {
   Controller,
   Get,
@@ -7,7 +8,7 @@ import {
 import { CACHE_MANAGER } from '@nestjs/cache-manager'
 import type { Cache } from 'cache-manager'
 import { PrismaService } from './prisma/prisma.service'
-import { StorageService } from './storage/storage.service'
+import { STORAGE_PORT, type StoragePort } from './storage/storage.port'
 
 @Controller('health')
 export class HealthController {
@@ -26,7 +27,7 @@ export class ReadinessController {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
-    private readonly storage: StorageService,
+    @Inject(STORAGE_PORT) private readonly storage: StoragePort,
   ) {}
 
   @Get('readyz')
@@ -41,15 +42,23 @@ export class ReadinessController {
     }
 
     try {
-      await this.cache.set('readyz:probe', 1, 5000)
-      await this.cache.get('readyz:probe')
+      // 随机 token 写后读回，验证 Redis 真实可用而非仅连接正常
+      const token = randomUUID()
+      const key = `readyz:probe:${token}`
+      await this.cache.set(key, token, 5000)
+      if ((await this.cache.get<string>(key)) !== token) {
+        throw new Error('redis round-trip mismatch')
+      }
       checks.push('redis: ok')
     } catch {
       throw new ServiceUnavailableException('redis unavailable')
     }
 
     try {
-      await this.storage.bucketExists()
+      // bucketExists 返回 false（桶不存在）同样视为未就绪
+      if (!(await this.storage.bucketExists())) {
+        throw new Error('storage bucket missing')
+      }
       checks.push('storage: ok')
     } catch {
       throw new ServiceUnavailableException('storage unavailable')

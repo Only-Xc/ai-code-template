@@ -13,7 +13,6 @@ import { configuration } from 'src/config'
 interface RateLimitRequest {
   url?: string
   ip?: string
-  headers?: { 'x-forwarded-for'?: string | string[] }
 }
 
 /** 基于缓存计数器的限流（镜像 fastapi：key=ratelimit:{path}:{client_ip}，超限 429）。 */
@@ -26,7 +25,8 @@ export class RateLimitGuard implements CanActivate {
     const limit = configuration('auth.rateLimitRequests') ?? 5
     const windowMs = (configuration('auth.rateLimitWindowSeconds') ?? 60) * 1000
     const path = (request.url ?? '').split('?')[0]
-    const key = `ratelimit:${path}:${this.clientIp(request)}`
+    // request.ip 由 Fastify 按 trustProxy 配置计算，未声明可信代理时忽略 x-forwarded-for
+    const key = `ratelimit:${path}:${request.ip ?? 'unknown'}`
 
     const current = (await this.cache.get<number>(key)) ?? 0
     if (current >= limit) {
@@ -34,13 +34,5 @@ export class RateLimitGuard implements CanActivate {
     }
     await this.cache.set(key, current + 1, windowMs)
     return true
-  }
-
-  private clientIp(request: RateLimitRequest): string {
-    const forwarded = request.headers?.['x-forwarded-for']
-    if (typeof forwarded === 'string' && forwarded.length > 0) {
-      return forwarded.split(',')[0].trim()
-    }
-    return request.ip ?? 'unknown'
   }
 }

@@ -5,6 +5,10 @@ app:
 server:
   host: 0.0.0.0
   port: 3000
+  # 请求体上限（字节），默认 40 MiB
+  bodyLimitBytes: 41943040
+  # 受信任的反向代理对等端（精确 IP 或受控 CIDR）；空数组 = 不信任 x-forwarded-for
+  trustedProxyIps: []
 
 database:
   url: postgresql://postgres:postgres@localhost:5432/nestjs
@@ -16,12 +20,16 @@ redis:
   db: 0
 
 storage:
+  # 对象存储实现：s3（MinIO/S3 兼容，默认）| local（本地文件系统，免 MinIO，不支持 presigned URL）
+  backend: s3
   endpoint: http://localhost:9000
   accessKey: minioadmin
   secretKey: minioadmin123
   bucket: app-assets
   region: us-east-1
   autoCreateBucket: true
+  # backend 为 local 时的根目录（相对路径基于进程工作目录解析）
+  localDirectory: .data/storage
 
 auth:
   jwtSecret: dev-secret-change-me

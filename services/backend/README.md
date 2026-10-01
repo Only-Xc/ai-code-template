@@ -53,16 +53,18 @@ pnpm --filter @template/backend test:e2e
 
 ```
 src/
-├── app.module.ts           # 根模块
-├── main.ts                 # 入口（Fastify 适配器、全局过滤器/拦截器/校验）
+├── app.module.ts           # 根模块（含请求上下文中间件注册）
+├── main.ts                 # 入口（Fastify 适配器、trustProxy/bodyLimit、全局过滤器/拦截器/校验）
 ├── swagger.ts              # Swagger 文档
 ├── health.controller.ts    # 健康检查 / 就绪探针（/api/health、/api/readyz）
-├── common/                 # 异常定义、全局过滤器、响应拦截器
-├── config/                 # YAML 环境配置（base + dev/test/prod 覆盖，支持环境变量覆盖）
-├── prisma/                 # PrismaService（PostgreSQL 适配器）
-├── storage/                # MinIO / S3 兼容对象存储（StorageService）
+├── common/                 # 异常、过滤器、响应拦截器、脱敏日志、观测（请求上下文）
+├── config/                 # YAML 环境配置（防原型污染合并 + 环境变量覆盖）
+├── prisma/                 # PrismaService（PostgreSQL 适配器 + 事务上下文 db()/transaction()）
+├── storage/                # 对象存储抽象（STORAGE_PORT：s3 默认 / local 本地文件系统）
 └── auth/                   # 认证与用户管理（JWT + Redis refresh / Argon2）
 ```
+
+存储实现由 `storage.backend` 选择：`s3`（MinIO/S3 兼容，默认）或 `local`（本地文件系统，免 MinIO，不支持 presigned URL）。消费方统一注入 `STORAGE_PORT`（`StoragePort` 接口），不感知具体实现。文件下载等原始响应用 `@RawResponse()` 标记跳过统一响应信封。
 
 ## 构建
 

@@ -3,6 +3,9 @@ app:
 
 server:
   port: 3001
+  # e2e 通过 X-Forwarded-For 伪造不同 client ip 隔离限流计数，需信任 loopback
+  trustedProxyIps:
+    - 127.0.0.1
 
 database:
   url: postgresql://postgres:postgres@localhost:5432/nestjs_test

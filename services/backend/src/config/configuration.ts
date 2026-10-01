@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'yaml'
 
-import { merge, get, set } from 'lodash-es'
+import { get, set } from 'lodash-es'
+import { mergeSafeRecords } from './configuration-files'
 
 /** 生产环境由环境变量覆盖的连接配置：{yaml 路径, 环境变量名}。 */
 const ENV_OVERRIDES: Array<[string, string]> = [
@@ -72,7 +73,7 @@ export function configuration(path?: string) {
   baseYamlConfig = baseYamlConfig ?? parseYaml(getEnvFilePath('base'))
   envYamlConfig = envYamlConfig ?? parseYaml(getEnvFilePath(environment))
 
-  const mergeConfig = merge({}, baseYamlConfig, envYamlConfig)
+  const mergeConfig = mergeSafeRecords(baseYamlConfig, envYamlConfig)
 
   applyEnvOverrides(mergeConfig)
 

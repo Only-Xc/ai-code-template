@@ -17,6 +17,9 @@ coverage
 .env.production
 .env.*.local
 
+# 本地文件系统存储（storage.backend=local 的默认根目录）
+.data/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

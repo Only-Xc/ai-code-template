@@ -9,7 +9,7 @@
     "format": "turbo run format",
     "format:check": "turbo run format:check",
     "lint": "turbo run lint",
-    "typecheck": "turbo run typecheck",
+    "typecheck": "turbo run typecheck && pnpm exec tsc -p tsconfig.root.json --noEmit",
     "typecheck:root": "tsc -b --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "tsx scripts/deploy.ts deploy",

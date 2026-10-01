@@ -1,0 +1,7 @@
+{
+  "extends": "@template/tooling/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["scripts/**/*.ts"]
+}

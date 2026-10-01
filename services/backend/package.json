@@ -106,7 +106,6 @@
       "^generated/prisma/(.*)$": "<rootDir>/../generated/prisma/$1",
       "^src/(.*)$": "<rootDir>/../src/$1"
     },
-    "passWithNoTests": true,
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import {
   CreateBucketCommand,
@@ -10,19 +11,22 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { configuration } from 'src/config'
-import { ObjectMetadata, PresignedUrl, UploadResult } from './storage.types'
+import type {
+  StorageObjectMetadata,
+  StoragePort,
+  StoragePresignedUrl,
+  StoragePutRequest,
+  StoragePutResult,
+  StorageReadOptions,
+} from './storage.port'
 
 const MAX_PRESIGNED_URL_EXPIRES_SECONDS = 7 * 24 * 3600
-
-interface PutObjectInput {
-  key: string
-  body: Buffer | Uint8Array
-  contentType?: string
-  metadata?: Record<string, string>
-}
+const DEFAULT_MAX_READ_BYTES = 1024 * 1024 * 1024
 
 @Injectable()
-export class StorageService implements OnModuleInit, OnModuleDestroy {
+export class StorageService
+  implements StoragePort, OnModuleInit, OnModuleDestroy
+{
   private readonly client: S3Client
   private readonly bucket: string
   private readonly autoCreateBucket: boolean
@@ -52,8 +56,8 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
     this.client.destroy()
   }
 
-  async putObject(input: PutObjectInput): Promise<UploadResult> {
-    const { key, body, contentType, metadata } = input
+  async putObject(request: StoragePutRequest): Promise<StoragePutResult> {
+    const { key, body, contentType, metadata } = request
     const result = await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -66,21 +70,42 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
     return {
       bucket: this.bucket,
       key,
-      sizeBytes: body.byteLength,
+      sizeBytes: body instanceof Uint8Array ? body.byteLength : undefined,
       contentType,
       etag: result.ETag,
-      metadata,
+      metadata: metadata ? { ...metadata } : undefined,
     }
   }
 
-  async getObject(key: string): Promise<Buffer> {
+  async getObject(
+    key: string,
+    options: StorageReadOptions = {},
+  ): Promise<Uint8Array> {
+    const maxBytes = options.maxBytes ?? DEFAULT_MAX_READ_BYTES
     const result = await this.client.send(
       new GetObjectCommand({ Bucket: this.bucket, Key: key }),
     )
     if (!result.Body) {
       throw new Error(`object body is empty: ${key}`)
     }
-    return Buffer.from(await result.Body.transformToByteArray())
+    if (result.ContentLength !== undefined && result.ContentLength > maxBytes) {
+      throw new Error(`object exceeded ${maxBytes} bytes: ${key}`)
+    }
+
+    const data = Buffer.from(await result.Body.transformToByteArray())
+    if (data.byteLength > maxBytes) {
+      throw new Error(`object exceeded ${maxBytes} bytes: ${key}`)
+    }
+    const expectedSha256 = options.expectedSha256
+    if (
+      expectedSha256 !== undefined &&
+      (!/^[a-f0-9]{64}$/iu.test(expectedSha256) ||
+        expectedSha256.toLowerCase() !==
+          createHash('sha256').update(data).digest('hex'))
+    ) {
+      throw new Error(`object digest did not match: ${key}`)
+    }
+    return data
   }
 
   async deleteObject(key: string): Promise<void> {
@@ -89,7 +114,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
     )
   }
 
-  async headObject(key: string): Promise<ObjectMetadata> {
+  async headObject(key: string): Promise<StorageObjectMetadata> {
     const result = await this.client.send(
       new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
     )
@@ -99,8 +124,8 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
       sizeBytes: result.ContentLength,
       contentType: result.ContentType,
       etag: result.ETag,
-      lastModified: result.LastModified,
       metadata: result.Metadata,
+      lastModified: result.LastModified,
     }
   }
 
@@ -138,7 +163,7 @@ export class StorageService implements OnModuleInit, OnModuleDestroy {
   async createPresignedGetUrl(
     key: string,
     expiresSeconds: number,
-  ): Promise<PresignedUrl> {
+  ): Promise<StoragePresignedUrl> {
     if (expiresSeconds > MAX_PRESIGNED_URL_EXPIRES_SECONDS) {
       throw new Error(
         `presigned url 有效期不能超过 7 天（${MAX_PRESIGNED_URL_EXPIRES_SECONDS}s）`,

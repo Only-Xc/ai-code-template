@@ -6,7 +6,7 @@ NestJS 后端模板，基于 pnpm workspace + turbo 的 monorepo，开箱即用�
 
 ```
 nestjs/
-├── apps/
+├── services/
 │   └── backend/            # @template/backend — NestJS 后端（Fastify 运行时）
 │       ├── src/
 │       │   ├── common/     # 异常 / 过滤器 / 响应拦截器
@@ -17,7 +17,7 @@ nestjs/
 │       ├── prisma/         # Prisma schema、模型与迁移
 │       ├── Dockerfile      # 多阶段构建
 │       └── test/           # e2e 测试（Jest + Supertest）
-├── deploy/
+├── infra/
 │   └── compose/            # compose.yml（生产）/ override.yml（本地）/ traefik.yml（反代）
 ├── packages/
 │   ├── tooling/            # @template/tooling — 共享 eslint / tsconfig / lint 配置
@@ -96,6 +96,6 @@ pnpm format:check
 
 ## 后端约定
 
-- **环境配置**：运行时选择 `RUNNING_ENV`，YAML 文件位于 `apps/backend/src/config/envs`，通过 `ConfigModule` 加载，避免散落 `process.env`
+- **环境配置**：运行时选择 `RUNNING_ENV`，YAML 文件位于 `services/backend/src/config/envs`，通过 `ConfigModule` 加载，避免散落 `process.env`
 - **响应格式**：全局 `ResponseInterceptor` 统一包装为 `{ code, message, success, data }`；业务错误抛 `ResponseException`，其余异常由全局过滤器处理
 - **持久层**：统一走 `PrismaService`，连接 PostgreSQL，连接串由 `database.url` 配置（生产可用 `DATABASE_URL` 覆盖）

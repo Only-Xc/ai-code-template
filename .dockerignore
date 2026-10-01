@@ -9,5 +9,5 @@ dist
 coverage
 *.log
 .DS_Store
-apps/backend/generated
-apps/backend/data
+services/backend/generated
+services/backend/data

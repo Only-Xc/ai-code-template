@@ -82,7 +82,7 @@ services:
 
     build:
       context: .
-      dockerfile: apps/backend/Dockerfile
+      dockerfile: services/backend/Dockerfile
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public

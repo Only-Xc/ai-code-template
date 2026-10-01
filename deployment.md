@@ -19,7 +19,7 @@ docker network create traefik-public
 
 ```bash
 mkdir -p /root/code/traefik-public/
-rsync -a deploy/compose/compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
+rsync -a infra/compose/compose.traefik.yml root@your-server.example.com:/root/code/traefik-public/
 ```
 
 在服务器上设置 Traefik 环境变量：
@@ -62,7 +62,7 @@ export OBJECT_STORAGE_SECRET_KEY="changethis"
 export BACKEND_CORS_ORIGINS="https://api.${DOMAIN?Variable not set}"
 ```
 
-生产配置由当前 shell、部署平台 secret 或 Secret 管理系统注入。基础 Compose 文件 `deploy/compose/compose.yml` 只引用环境变量，后端连接通过 `DATABASE_URL`、`REDIS_URL`、`OBJECT_STORAGE_*` 注入（覆盖 YAML 默认值）。
+生产配置由当前 shell、部署平台 secret 或 Secret 管理系统注入。基础 Compose 文件 `infra/compose/compose.yml` 只引用环境变量，后端连接通过 `DATABASE_URL`、`REDIS_URL`、`OBJECT_STORAGE_*` 注入（覆盖 YAML 默认值）。
 
 建议使用安全随机值替换示例密码和密钥：
 
@@ -85,7 +85,7 @@ pnpm tsx scripts/deploy.ts migrate
 pnpm tsx scripts/deploy.ts up
 ```
 
-生产环境只加载 `deploy/compose/compose.yml`，通过 shell、部署平台 secret 或 Secret 管理系统提供变量。
+生产环境只加载 `infra/compose/compose.yml`，通过 shell、部署平台 secret 或 Secret 管理系统提供变量。
 
 常用运维命令：
 

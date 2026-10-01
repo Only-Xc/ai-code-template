@@ -38,9 +38,9 @@ if (full) {
       '--env-file',
       '.env.development',
       '-f',
-      'deploy/compose/compose.yml',
+      'infra/compose/compose.yml',
       '-f',
-      'deploy/compose/compose.override.yml',
+      'infra/compose/compose.override.yml',
       'build',
     ],
   ])

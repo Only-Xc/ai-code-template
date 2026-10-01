@@ -53,7 +53,7 @@ export const eslintConfig = defineConfig([
       'import-x/resolver-next': [
         createTypeScriptImportResolver({
           project: [
-            'apps/*/tsconfig.json',
+            'services/*/tsconfig.json',
             'packages/*/tsconfig.json',
           ],
         }),
@@ -96,7 +96,7 @@ export const eslintConfig = defineConfig([
   },
   {
     name: '@template/backend-unsafe',
-    files: ['apps/backend/**/*.{ts,tsx}'],
+    files: ['services/backend/**/*.{ts,tsx}'],
     rules: {
       // NestJS/Express/Prisma/Supertest 广泛使用 any（DI、请求响应、测试断言），
       // no-unsafe-* 类规则在此误报过多，对 backend 关闭；utils 仍保留完整类型检查

@@ -9,9 +9,9 @@
 ## 仓库概览
 
 - 本仓库使用 pnpm monorepo + turbo，包名统一 `@template/*` scope
-- 工作区包位于 `apps/*` 和 `packages/*`
+- 工作区包位于 `services/*` 和 `packages/*`
 - 主要应用：
-  - `apps/backend`：`@template/backend`，NestJS 后端（Fastify + Prisma + Redis + MinIO）
+  - `services/backend`：`@template/backend`，NestJS 后端（Fastify + Prisma + Redis + MinIO）
 - 共享工具与配置包：
   - `packages/tooling`：`@template/tooling`，共享 lint / format / tsconfig
   - `packages/utils`：`@template/utils`，基础工具库（number / request / storage / websocket）
@@ -36,7 +36,7 @@
 - 后端运行时使用 Fastify（`ignoreTrailingSlash: true`），接口版本控制用 `VersioningType.URI`
 - 后端环境通过 `RUNNING_ENV` 选择（dev / test / prod）
 - 跨平台环境变量脚本应使用 `cross-env`
-- 后端 YAML 配置文件位于 `apps/backend/src/config/envs`
+- 后端 YAML 配置文件位于 `services/backend/src/config/envs`
 - 若运行时依赖 YAML 资源，构建产物必须把它们复制到 `dist`
 
 ## 基础设施约定

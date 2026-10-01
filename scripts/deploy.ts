@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PRODUCTION_ENV_FILE = '.env.production'
-const COMPOSE_FILES = ['-f', 'deploy/compose/compose.yml']
+const COMPOSE_FILES = ['-f', 'infra/compose/compose.yml']
 const COMPOSE_ENV_FILE = ['--env-file', PRODUCTION_ENV_FILE]
 const MIGRATION_COMMAND = [
   'run',

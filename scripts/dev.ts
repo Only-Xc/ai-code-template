@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url'
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const COMPOSE_FILES = [
   '-f',
-  'deploy/compose/compose.yml',
+  'infra/compose/compose.yml',
   '-f',
-  'deploy/compose/compose.override.yml',
+  'infra/compose/compose.override.yml',
 ]
 const COMPOSE_ENV_FILE = ['--env-file', '.env.development']
 const LOCAL_DEPENDENCY_SERVICES = ['db', 'redis', 'minio']

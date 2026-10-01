@@ -58,6 +58,8 @@ export async function runResponsePlugins(
 
 /**
  * 归一化错误后按顺序执行错误插件。
+ *
+ * 错误处理器属于观察性副作用：单个处理器抛错被隔离，不覆盖原请求错误。
  */
 export async function runErrorPlugins(
   error: unknown,
@@ -67,10 +69,14 @@ export async function runErrorPlugins(
   let requestError = normalizeRequestError(error, context.config)
 
   for (const plugin of plugins) {
-    const result = await plugin.onError?.(requestError, context)
+    try {
+      const result = await plugin.onError?.(requestError, context)
 
-    if (result) {
-      requestError = result
+      if (result) {
+        requestError = result
+      }
+    } catch {
+      // 请求失败本身才是最终结果
     }
   }
 
@@ -79,12 +85,31 @@ export async function runErrorPlugins(
 
 /**
  * 按顺序执行请求结束插件。
+ *
+ * 逐个隔离清理 hook 的异常，全部执行完后抛出首个清理错误，
+ * 避免单个失败的 cleanup 跳过后续清理。
  */
 export async function runFinallyPlugins(
   context: RequestContext,
   plugins: readonly RequestPlugin[],
 ) {
+  let cleanupError: unknown
+  let hasCleanupError = false
+
   for (const plugin of plugins) {
-    await plugin.onFinally?.(context)
+    try {
+      await plugin.onFinally?.(context)
+    } catch (error) {
+      if (!hasCleanupError) {
+        cleanupError = error
+        hasCleanupError = true
+      }
+    }
+  }
+
+  if (hasCleanupError) {
+    throw cleanupError instanceof Error
+      ? cleanupError
+      : new Error('Request cleanup hook failed', { cause: cleanupError })
   }
 }

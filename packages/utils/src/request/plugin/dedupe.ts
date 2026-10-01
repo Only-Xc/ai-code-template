@@ -42,7 +42,7 @@ export function dedupePlugin(): RequestPlugin {
   return createRequestPlugin({
     name: 'dedupe',
     onRequest(config, context) {
-      if (config.skipDedupe) {
+      if (config.skipDedupe || isBinaryRequestBody(config.data)) {
         return config
       }
 
@@ -190,6 +190,20 @@ function normalizeSerializableValue(value: unknown): unknown {
   }
 
   return value
+}
+
+/**
+ * 二进制和 multipart 请求没有可安全复用的请求身份。
+ *
+ * 不把 payload 内容强行读入 key：上传内容可能很大，也可能是同形状但不同
+ * 字节的 Blob/FormData。此类请求交由调用方各自完成，不取消并发上传。
+ */
+function isBinaryRequestBody(value: unknown) {
+  if (typeof Blob !== 'undefined' && value instanceof Blob) return true
+  if (typeof FormData !== 'undefined' && value instanceof FormData) return true
+  if (value instanceof ArrayBuffer || ArrayBuffer.isView(value)) return true
+
+  return false
 }
 
 /**

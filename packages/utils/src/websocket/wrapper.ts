@@ -138,6 +138,21 @@ export class WebSocketWrapper {
    * 当前 WebSocket 实例。
    */
   private socket: WebSocket | null = null
+  /**
+   * 当前 socket 的原生事件监听器，用于在连接切换或销毁时解绑。
+   */
+  private socketListeners: {
+    socket: WebSocket
+    open: (event: Event) => void
+    close: (event: CloseEvent) => void
+    error: (event: Event) => void
+    message: (event: MessageEvent) => void
+  } | null = null
+
+  /**
+   * 当前 socket 错误分支安排的关闭检查定时器。
+   */
+  private socketErrorTimer: number | null = null
 
   /**
    * 是否已被主动停止。主动 close/destroy 后会阻止自动重连。
@@ -205,8 +220,9 @@ export class WebSocketWrapper {
   /**
    * 主动关闭连接。
    *
-   * 调用后会停止心跳和自动重连；已注册的事件监听器会保留。
+   * 调用后会停止心跳和自动重连，并解除当前 socket 的原生事件监听器。
    */
+
   close(code?: number, reason?: string) {
     this.stopped = true
     this.clearReconnectTimer()
@@ -217,10 +233,10 @@ export class WebSocketWrapper {
 
     if (isActiveSocket(socket)) {
       socket.close(code, reason)
-      return
     }
 
-    this.socket = null
+    this.unbindSocket(socket)
+    if (this.socket === socket) this.socket = null
     this.setState('closed')
   }
 
@@ -236,6 +252,10 @@ export class WebSocketWrapper {
     this.stopped = false
     this.clearReconnectTimer()
     this.setState('connecting')
+
+    const previousSocket = this.socket
+    this.unbindSocket(previousSocket)
+    this.socket = null
 
     try {
       const socket = new WebSocket(this.url)
@@ -257,6 +277,7 @@ export class WebSocketWrapper {
    */
   destroy(code?: number, reason?: string) {
     this.close(code, reason)
+    this.unbindSocket(this.socket)
     this.unbindVisibilityChange()
     this.events.clear()
   }
@@ -328,7 +349,9 @@ export class WebSocketWrapper {
    * 每个回调都会校验 socket 引用，避免旧连接事件污染新连接状态。
    */
   private bindSocket(socket: WebSocket) {
-    socket.addEventListener('open', (event) => {
+    this.unbindSocket(this.socket)
+
+    const open = (event: Event) => {
       if (socket !== this.socket) return
 
       this.logger?.info?.('WebSocket 连接成功')
@@ -337,20 +360,22 @@ export class WebSocketWrapper {
       this.setState('open')
       this.events.emit('open', event)
       this.startHeartBeat()
-    })
+    }
 
-    socket.addEventListener('close', (event) => {
+    const close = (event: CloseEvent) => {
       this.handleSocketClose(socket, event)
-    })
+    }
 
-    socket.addEventListener('error', (event) => {
+    const error = (event: Event) => {
       if (socket !== this.socket) return
 
       this.logger?.error?.('WebSocket 错误', event)
       this.events.emit('error', event)
 
       if (socket.readyState === WebSocket.CLOSED) {
-        window.setTimeout(() => {
+        this.clearSocketErrorTimer()
+        this.socketErrorTimer = window.setTimeout(() => {
+          this.socketErrorTimer = null
           if (
             socket === this.socket &&
             socket.readyState === WebSocket.CLOSED
@@ -364,13 +389,45 @@ export class WebSocketWrapper {
       if (socket.readyState !== WebSocket.CLOSING) {
         socket.close()
       }
-    })
+    }
 
-    socket.addEventListener('message', (event) => {
+    const message = (event: MessageEvent) => {
       if (socket !== this.socket) return
 
       this.events.emit('message', event)
-    })
+    }
+
+    socket.addEventListener('open', open)
+    socket.addEventListener('close', close)
+    socket.addEventListener('error', error)
+    socket.addEventListener('message', message)
+    this.socketListeners = { socket, open, close, error, message }
+  }
+
+  /**
+   * 移除当前 socket 的原生事件监听器，并取消错误关闭检查。
+   */
+  private unbindSocket(socket: WebSocket | null) {
+    this.clearSocketErrorTimer()
+
+    const listeners = this.socketListeners
+    if (listeners?.socket !== socket) return
+
+    socket?.removeEventListener('open', listeners.open)
+    socket?.removeEventListener('close', listeners.close)
+    socket?.removeEventListener('error', listeners.error)
+    socket?.removeEventListener('message', listeners.message)
+    this.socketListeners = null
+  }
+
+  /**
+   * 取消错误分支安排的关闭检查。
+   */
+  private clearSocketErrorTimer() {
+    if (this.socketErrorTimer === null) return
+
+    window.clearTimeout(this.socketErrorTimer)
+    this.socketErrorTimer = null
   }
 
   /**
@@ -448,6 +505,7 @@ export class WebSocketWrapper {
   private handleSocketClose(socket: WebSocket, event: CloseEvent) {
     if (socket !== this.socket) return
 
+    this.unbindSocket(socket)
     this.logger?.info?.('WebSocket 连接断开', event)
     this.socket = null
     this.stopHeartBeat()

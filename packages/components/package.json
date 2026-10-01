@@ -8,6 +8,22 @@
       "types": "./index.ts",
       "import": "./index.ts"
     },
+    "./PageContainer": {
+      "types": "./src/PageContainer/index.ts",
+      "import": "./src/PageContainer/index.ts"
+    },
+    "./EmptyState": {
+      "types": "./src/EmptyState/index.ts",
+      "import": "./src/EmptyState/index.ts"
+    },
+    "./LoadingState": {
+      "types": "./src/LoadingState/index.ts",
+      "import": "./src/LoadingState/index.ts"
+    },
+    "./ErrorState": {
+      "types": "./src/ErrorState/index.ts",
+      "import": "./src/ErrorState/index.ts"
+    },
     "./tailwind-source.css": "./src/tailwind-source.css"
   },
   "sideEffects": [

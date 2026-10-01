@@ -29,11 +29,32 @@ function createStorageApi(storage: Storage): StorageApi {
         return undefined
       }
 
-      const data = JSON.parse(item) as StorageValue<T>
-
-      if (data.expiresAt !== undefined && Date.now() >= data.expiresAt) {
+      let data: StorageValue<T>
+      try {
+        const parsed: unknown = JSON.parse(item)
+        if (typeof parsed !== 'object' || parsed === null) {
+          storage.removeItem(key)
+          return undefined
+        }
+        data = parsed as StorageValue<T>
+      } catch {
+        // 不可信持久化：解析失败清理坏条目并返回兜底结果
         storage.removeItem(key)
         return undefined
+      }
+
+      if (data.expiresAt !== undefined) {
+        if (
+          typeof data.expiresAt !== 'number' ||
+          !Number.isFinite(data.expiresAt)
+        ) {
+          storage.removeItem(key)
+          return undefined
+        }
+        if (Date.now() >= data.expiresAt) {
+          storage.removeItem(key)
+          return undefined
+        }
       }
 
       return data.value

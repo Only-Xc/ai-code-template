@@ -10,7 +10,8 @@
     "typecheck": "tsc -b --noEmit",
     "format": "oxfmt . --write && oxlint . --fix && eslint . --fix",
     "format:check": "oxfmt . --check",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@ant-design/icons": "^6.2.2",
@@ -54,6 +55,10 @@
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "tailwindcss": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "vitest": "^3.2.4",
+    "jsdom": "^26.1.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/dom": "^10.4.0"
   }
 }

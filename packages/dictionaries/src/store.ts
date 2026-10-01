@@ -16,12 +16,40 @@ interface DictState {
   clearDict: (type?: DictType) => void
 }
 
-function cloneItems(items: readonly DictItem[]) {
-  return items.map((item) => ({ ...item }))
+/**
+ * 注册时深拷贝字典项：labels/raw 与之后对源对象的修改彻底脱钩，
+ * store 内的字典快照不被外部引用污染。
+ */
+export function cloneDictItems<Value extends string>(
+  items: readonly DictItem<Value>[],
+) {
+  return items.map((item) => ({
+    ...item,
+    labels: item.labels ? { ...item.labels } : undefined,
+    raw: item.raw ? cloneRecord(item.raw) : undefined,
+  }))
+}
+
+function cloneRecord(value: Readonly<Record<string, unknown>>) {
+  return Object.fromEntries(
+    Object.entries(value).map(([key, entryValue]) => [
+      key,
+      cloneValue(entryValue),
+    ]),
+  )
+}
+
+function cloneValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map((item) => cloneValue(item))
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    return cloneRecord(value as Readonly<Record<string, unknown>>)
+  }
+
+  return value
 }
 
 function createInitialDictMap(): DictMap {
-  return mapValues(dictRegistry, cloneItems)
+  return mapValues(dictRegistry, cloneDictItems)
 }
 
 export const useDictStore = create<DictState>((set) => ({
@@ -34,7 +62,7 @@ export const useDictStore = create<DictState>((set) => ({
     set((state) => ({
       dictMap: {
         ...state.dictMap,
-        [type]: cloneItems(items),
+        [type]: cloneDictItems(items),
       },
     }))
   },

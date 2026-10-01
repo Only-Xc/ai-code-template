@@ -12,7 +12,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "typecheck:root": "tsc -b --noEmit",
-    "test": "pnpm --filter @ai-app/utils test"
+    "test": "pnpm -r --if-present test"
   },
   "keywords": [],
   "author": "",
